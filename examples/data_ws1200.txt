@@ -1,0 +1,28 @@
+# Alecto WS-1200 V1.0
+# should show a CRC-8 poly 0x31 init 0x0 for 7 bytes
+# and also byte sum with Chk Subtract/Xor for 8 bytes
+# e.g.
+# Found: add_bytes(&b[0], 7) - b[7] == 0x00; // (100.0%)
+# Found: add_bytes(&b[0], 7) ^ b[7] == 0x00; // (100.0%)
+# Found: crc8(&b[0], 6, 0x31, 0x00) ^ b[6] == 0; // (100.0%)
+
+#            ADD-8 -- vv
+#        CRC-8 -- vv
+36 72 6e 03 00 ff 4c  64
+36 72 6e 04 00 ff af  c8
+36 72 6d 05 00 ff 75  8e
+36 72 6e 05 00 ff e9  03
+36 72 6e 06 00 ff 23  3e
+36 72 6e 07 00 ff 65  81
+36 72 6e 08 00 ff d4  f1
+36 72 6e 09 00 ff 92  b0
+36 72 6e 0a 00 ff 58  77
+36 72 6e 0b 00 ff 1e  3e
+36 72 6e 0c 00 ff fd  1e
+36 72 6e 0d 00 ff bb  dd
+36 72 6e 0e 00 ff 71  94
+36 72 6e 0f 00 ff 37  5b
+36 72 6e 10 00 ff 22  47
+36 72 6e 11 00 ff 64  8a
+36 72 6e 12 00 ff ae  d5
+36 72 6e 13 00 ff e8  10

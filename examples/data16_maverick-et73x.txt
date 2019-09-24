@@ -1,0 +1,11 @@
+; Maverick ET-73x
+; 16 bit digest (excluding the preamble, includes non-transmitted device id renewed on a device reset)
+; gen 0x8810 init 0xdd38
+
+/*fa 8*/ 2 8b a2 e6 1a 6 // id 53244
+/*fa 8*/ 7 8b a2 ec 11 0 // id 6769
+/*fa 8*/ 2 8b a2 eb 42 b // id 6769
+/*fa 8*/ 2 00 22 e4 eb 4 // id 12915 / 0x3273
+/*fa 8*/ 2 8b a3 18 f6 4 // id 12915 / 0x3273
+/*fa 8*/ 2 8b a3 0b c5 5 // id 12915 / 0x3273
+/*fa 8*/ 2 8b a3 2d a3 7 // id 12915 / 0x3273

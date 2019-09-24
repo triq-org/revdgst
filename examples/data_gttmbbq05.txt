@@ -1,0 +1,14 @@
+; Globaltronics GT-TMBBQ-05
+; Unknown 8 bit checksum
+
+49 ad 79 15
+49 ae 79 16
+49 af 79 06
+49 b0 79 19
+49 b2 79 0a
+49 b3 79 1c
+49 b4 79 0c
+49 b5 79 1e
+49 b6 79 1f
+49 b7 79 0f
+49 b9 79 12
