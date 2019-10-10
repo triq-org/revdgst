@@ -105,6 +105,9 @@ endif()
 ########################################################################
 # Build executables
 ########################################################################
+add_executable(shft src/shft.c ${COMMON_SOURCES})
+target_link_libraries(shft ${TOOLS_LIBS})
+
 add_executable(bitbrk src/bitbrk.c ${COMMON_SOURCES})
 target_link_libraries(bitbrk ${TOOLS_LIBS})
 
