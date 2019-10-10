@@ -87,6 +87,9 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
             else if (c_len != (nibble + 1) / 2) {
                 fprintf(stderr, "Code len mismatched %u bytes expected but got %u bytes (%u nibbles).\n", c_len, (nibble + 1) / 2, nibble);
             }
+            if (nibble & 1) {
+                d++; // finish the last byte if we only got a nibble
+            }
             data->chk = d[-1];
             data->chk16 = (d[-2] << 8) | d[-1];
             data++;
