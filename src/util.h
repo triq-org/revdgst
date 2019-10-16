@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 __attribute__((always_inline))
-static uint8_t reflect8(uint8_t x)
+static inline uint8_t reflect8(uint8_t x)
 {
     x = (x & 0xF0) >> 4 | (x & 0x0F) << 4;
     x = (x & 0xCC) >> 2 | (x & 0x33) << 2;
@@ -21,7 +21,7 @@ static uint8_t reflect8(uint8_t x)
 }
 
 __attribute__((always_inline))
-static void reflect_bytes(uint8_t message[], unsigned num_bytes)
+static inline void reflect_bytes(uint8_t message[], unsigned num_bytes)
 {
     for (unsigned i = 0; i < num_bytes; ++i) {
         message[i] = reflect8(message[i]);
@@ -29,7 +29,7 @@ static void reflect_bytes(uint8_t message[], unsigned num_bytes)
 }
 
 __attribute__((always_inline))
-static uint8_t reflect4(uint8_t x)
+static inline uint8_t reflect4(uint8_t x)
 {
     x = (x & 0xCC) >> 2 | (x & 0x33) << 2;
     x = (x & 0xAA) >> 1 | (x & 0x55) << 1;
@@ -37,7 +37,7 @@ static uint8_t reflect4(uint8_t x)
 }
 
 __attribute__((always_inline))
-static void reflect_nibbles(uint8_t message[], unsigned num_bytes)
+static inline void reflect_nibbles(uint8_t message[], unsigned num_bytes)
 {
     for (unsigned i = 0; i < num_bytes; ++i) {
         message[i] = reflect4(message[i]);
@@ -45,7 +45,7 @@ static void reflect_nibbles(uint8_t message[], unsigned num_bytes)
 }
 
 __attribute__((always_inline))
-static uint8_t xor_bytes(uint8_t const message[], unsigned num_bytes)
+static inline uint8_t xor_bytes(uint8_t const message[], unsigned num_bytes)
 {
     uint8_t result = 0;
     for (unsigned i = 0; i < num_bytes; ++i) {
@@ -55,7 +55,7 @@ static uint8_t xor_bytes(uint8_t const message[], unsigned num_bytes)
 }
 
 __attribute__((always_inline))
-static int add_bytes(uint8_t const message[], unsigned num_bytes)
+static inline int add_bytes(uint8_t const message[], unsigned num_bytes)
 {
     int result = 0;
     for (unsigned i = 0; i < num_bytes; ++i) {
@@ -65,7 +65,7 @@ static int add_bytes(uint8_t const message[], unsigned num_bytes)
 }
 
 __attribute__((always_inline))
-static int add_nibbles(uint8_t const message[], unsigned num_bytes)
+static inline int add_nibbles(uint8_t const message[], unsigned num_bytes)
 {
     int result = 0;
     for (unsigned i = 0; i < num_bytes; ++i) {
@@ -75,7 +75,7 @@ static int add_nibbles(uint8_t const message[], unsigned num_bytes)
 }
 
 __attribute__((always_inline))
-static void invert_bytes(uint8_t message[], unsigned num_bytes)
+static inline void invert_bytes(uint8_t message[], unsigned num_bytes)
 {
     for (unsigned i = 0; i < num_bytes; ++i) {
         message[i] ^= 0xff;
@@ -83,7 +83,7 @@ static void invert_bytes(uint8_t message[], unsigned num_bytes)
 }
 
 __attribute__((always_inline))
-static uint8_t crc8(uint8_t const message[], unsigned nBytes, uint8_t polynomial, uint8_t init)
+static inline uint8_t crc8(uint8_t const message[], unsigned nBytes, uint8_t polynomial, uint8_t init)
 {
     uint8_t remainder = init;
     unsigned byte, bit;

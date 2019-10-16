@@ -57,7 +57,7 @@ static void job_exec_parallel(int (*call)(int), int numofthreads)
     fprintf(stderr, "Running %d threads...\n", numofthreads);
 
     job_count = call(-1);
-    job_next = 0;
+    atomic_store_explicit(&job_next, 0, memory_order_relaxed);
     job_call = call;
 
     for (int i = 0; i < numofthreads; ++i) {

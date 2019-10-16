@@ -12,19 +12,19 @@
 #ifdef __GNUC__
 
 __attribute__((always_inline))
-static int popcount(unsigned x)
+static inline int popcount(unsigned x)
 {
     return __builtin_popcount(x);
 }
 
 __attribute__((always_inline))
-static int parity(unsigned x)
+static inline int parity(unsigned x)
 {
     return __builtin_parity(x);
 }
 
 __attribute__((always_inline))
-static int parityll(unsigned x)
+static inline int parityll(unsigned x)
 {
     return __builtin_parityll(x);
 }
@@ -33,7 +33,7 @@ static int parityll(unsigned x)
 #warning No builtin popcount
 
 __attribute__((always_inline))
-static int popcount(unsigned x)
+static inline int popcount(unsigned x)
 {
     x = x - ((x >> 1) & 0x55555555);
     x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
@@ -41,7 +41,7 @@ static int popcount(unsigned x)
 }
 
 __attribute__((always_inline))
-static int parity(unsigned x)
+static inline int parity(unsigned x)
 {
     x = (x & 0x55555555) + ((x >> 1) & 0x55555555);
     x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
@@ -52,7 +52,7 @@ static int parity(unsigned x)
 }
 
 __attribute__((always_inline))
-static int parityll(unsigned long long x)
+static inline int parityll(unsigned long long x)
 {
     return parity(x ^ (x >> 32));
 }

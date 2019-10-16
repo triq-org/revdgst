@@ -226,10 +226,24 @@ int main(int argc, char const *argv[])
     int verbose = 0;
     double min_matches_pct = 0.5;
 
-    if (argc <= 1) {
+    int i = 1;
+    for (; i < argc; ++i) {
+        if (*argv[i] != '-')
+            break;
+        if (argv[i][1] == 'h')
+            usage(argc, argv);
+        else if (argv[i][1] == 'v')
+            verbose = 1;
+        else {
+            fprintf(stderr, "Wrong argument (%s).\n", argv[i]);
+            usage(argc, argv);
+        }
+    }
+
+    if (argc <= i) {
         fprintf(stderr, "Reading STDIN...\n");
     }
-    list_len = read_codes(argv[1], data, &msg_len, MSG_MAX, LIST_MAX);
+    list_len = read_codes(argv[i], data, &msg_len, MSG_MAX, LIST_MAX);
     if (list_len <= 0) {
         fprintf(stderr, "Missing data!\n");
         usage(argc, argv);
@@ -249,21 +263,21 @@ int main(int argc, char const *argv[])
     scan_algos();
 
     fprintf(stderr, "\nINVERT Inverting...\n");
-    for (int i = 0; i < list_len; ++i) {
-        invert_bytes(data[i].d, msg_len);
+    for (int j = 0; j < list_len; ++j) {
+        invert_bytes(data[j].d, msg_len);
     }
     scan_algos();
 
     fprintf(stderr, "\nBYTE_REFLECT Reflecting...\n");
-    for (int i = 0; i < list_len; ++i) {
-        invert_bytes(data[i].d, msg_len);
-        reflect_bytes(data[i].d, msg_len);
+    for (int j = 0; j < list_len; ++j) {
+        invert_bytes(data[j].d, msg_len);
+        reflect_bytes(data[j].d, msg_len);
     }
     scan_algos();
 
     fprintf(stderr, "\nINVERT BYTE_REFLECT Inverting...\n");
-    for (int i = 0; i < list_len; ++i) {
-        invert_bytes(data[i].d, msg_len);
+    for (int j = 0; j < list_len; ++j) {
+        invert_bytes(data[j].d, msg_len);
     }
     scan_algos();
 

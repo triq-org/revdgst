@@ -31,7 +31,7 @@ There is no overhead in making an algorithm consume data bits in multiple possib
 */
 
 __attribute__((always_inline))
-static void algo_fletcher8(int y_rev, int i_rev, int rev,
+static inline void algo_fletcher8(int y_rev, int i_rev, int rev,
         uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
@@ -62,10 +62,11 @@ static void algo_fletcher8(int y_rev, int i_rev, int rev,
     else {
         *sum_add = c1 << 4 | c0;
     }
+    *sum_xor = *sum_add; // bogus
 }
 
 __attribute__((always_inline))
-static void algo_shift16_8(int y_rev, int i_rev, int rev,
+static inline void algo_shift16_8(int y_rev, int i_rev, int rev,
         uint8_t *msg, int bytes, uint8_t key1, uint8_t key2, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
@@ -115,7 +116,7 @@ static void algo_shift16_8(int y_rev, int i_rev, int rev,
 }
 
 __attribute__((always_inline))
-static void algo_elcheapo8(int y_rev, int i_rev, int rev,
+static inline void algo_elcheapo8(int y_rev, int i_rev, int rev,
         uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
@@ -144,7 +145,7 @@ static void algo_elcheapo8(int y_rev, int i_rev, int rev,
 }
 
 __attribute__((always_inline))
-static void algo_crc8(int y_rev, int i_rev, int rev,
+static inline void algo_crc8(int y_rev, int i_rev, int rev,
         uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
@@ -195,7 +196,7 @@ static void algo_crc8(int y_rev, int i_rev, int rev,
 // Checksum is actually an "LFSR-based Toeplitz hash"
 // gen needs to includes the msb if the lfsr is rolling, key is the initial key
 __attribute__((always_inline))
-static void algo_lfsr_digest8_galois(int y_rev, int i_rev, int rev,
+static inline void algo_lfsr_digest8_galois(int y_rev, int i_rev, int rev,
         uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
@@ -255,7 +256,7 @@ static void algo_lfsr_digest8_galois(int y_rev, int i_rev, int rev,
 // Checksum is actually an "LFSR-based Toeplitz hash"
 // gen needs to includes the msb if the lfsr is rolling, key is the initial key
 __attribute__((always_inline))
-static void algo_lfsr_digest8_fibonacci(int y_rev, int i_rev, int rev,
+static inline void algo_lfsr_digest8_fibonacci(int y_rev, int i_rev, int rev,
         uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
@@ -313,7 +314,7 @@ static void algo_lfsr_digest8_fibonacci(int y_rev, int i_rev, int rev,
 }
 
 __attribute__((always_inline))
-static void call_algo(int algo, int y_rev, int i_rev, int rev,
+static inline void call_algo(int algo, int y_rev, int i_rev, int rev,
         uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     if (algo == 1)
@@ -336,7 +337,7 @@ static unsigned list_len = 0;
 static unsigned min_matches = 0;
 
 __attribute__((always_inline))
-static void *runner(int algo, int y_rev, int i_rev, int rev)
+static inline void *runner(int algo, int y_rev, int i_rev, int rev)
 {
     for (int g = 0; g <= 0xff; ++g) {
         for (int k = 0; k <= 0xff; ++k) {

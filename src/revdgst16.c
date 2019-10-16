@@ -25,7 +25,7 @@ Modify this algorithm to test other possible checksum methods.
 */
 
 __attribute__((always_inline))
-static void algo_lfsr_digest16(uint8_t *msg, unsigned bytes, uint16_t gen, uint16_t key, uint16_t *sum, uint16_t *xor)
+static inline void algo_lfsr_digest16(uint8_t *msg, unsigned bytes, uint16_t gen, uint16_t key, uint16_t *sum, uint16_t *xor)
 {
     *sum = 0;
     *xor = 0;
@@ -126,18 +126,6 @@ static int runner(int offset)
                 }
             }
 
-            if (fxx) {
-                for (int i = 0; i < list_len; ++i) {
-                    struct data dd = data[i];
-                    uint16_t ds;
-                    uint16_t dx;
-                    algo_lfsr_digest16(dd.d, msg_len, g, k, &ds, &dx);
-                    uint16_t dxx = dx ^ dd.chk16;
-                    printf("uint16_t rxx = rx ^ rd.chk; %04x %04x %04x\n", dxx, dx, dd.chk16);
-                }
-            }
-
-            if (fsx) DONE("sum xor");
             if (fsx) DONE("sum xor");
             if (fxx) DONE("xor xor");
             if (fsa) DONE("sum add");
