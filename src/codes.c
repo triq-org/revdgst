@@ -11,6 +11,63 @@
 
 #include "codes.h"
 
+int parse_code(char const *text, struct data *data)
+{
+    if (!text || !*text) {
+        return 0;
+    }
+    // parse hex chars
+    uint8_t *d = data->d;
+    unsigned nibble = 0;
+    int bit_len = -1;
+    for (char const *p = text; *p; ++p) {
+        // parse optional length indicator
+        if (*p == '{') {
+            char const *l = ++p;
+            while (*p && *p != '}')
+                p++;
+            char *e = NULL;
+            bit_len = (int)strtol(l, &e, 10);
+            if (!*p || p != e) {
+                fprintf(stderr, "Bad bit length indicator \"%.5s\".\n", p);
+                break;
+            }
+            continue;
+        }
+        // skip '0x'
+        if (*p == '0' && p[1] == 'x') {
+            p++;
+            continue;
+        }
+        if ((*p < '0' || *p > '9') && (*p < 'A' || *p > 'F') && (*p < 'a' || *p > 'f'))
+            continue;
+
+        unsigned digit;
+        sscanf(p, "%1x", &digit);
+        if (nibble & 1) {
+            *d++ |= digit; // low order nibble
+        }
+        else {
+            *d = digit << 4; // high order nibble
+        }
+        nibble++;
+        if (nibble / 2 >= MSG_MAX) {
+            fprintf(stderr, "Maximum number of msg bytes (%u) reached.\n", MSG_MAX);
+            break;
+        }
+    }
+    if (!nibble) {
+        return 0;
+    }
+
+    if (bit_len < 0) {
+        bit_len = nibble * 4;
+    }
+    data->bit_len = bit_len;
+
+    return bit_len;
+}
+
 int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsigned msg_max, unsigned list_max)
 {
     FILE *fp;
@@ -33,6 +90,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
         // parse hex chars
         uint8_t *d = data->d;
         unsigned nibble = 0;
+        int bit_len = -1;
         for (char *p = line; *p; ++p) {
             // skip multiline comment
             if (*p == '/' && p[1] == '*') {
@@ -50,13 +108,25 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
                     continue;
             }
 
-            int digit;
             // end at comments
             if (*p == ';' || *p == '#')
                 break;
             if (*p == '/' && p[1] == '/') {
                 p++;
                 break;
+            }
+            // parse optional length indicator
+            if (*p == '{') {
+                char *l = ++p;
+                while (*p && *p != '}')
+                    p++;
+                char *e = NULL;
+                bit_len = (int)strtol(l, &e, 10);
+                if (!*p || p != e) {
+                    fprintf(stderr, "Bad bit length indicator \"%.5s\".\n", p);
+                    break;
+                }
+                continue;
             }
             // skip '0x'
             if (*p == '0' && p[1] == 'x') {
@@ -66,6 +136,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
             if ((*p < '0' || *p > '9') && (*p < 'A' || *p > 'F') && (*p < 'a' || *p > 'f'))
                 continue;
 
+            unsigned digit;
             sscanf(p, "%1x", &digit);
             if (nibble & 1) {
                 *d++ |= digit; // low order nibble
@@ -87,11 +158,15 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
             else if (c_len != (nibble + 1) / 2) {
                 fprintf(stderr, "Code len mismatched %u bytes expected but got %u bytes (%u nibbles).\n", c_len, (nibble + 1) / 2, nibble);
             }
+            if (bit_len < 0) {
+                bit_len = nibble * 4;
+            }
             if (nibble & 1) {
                 d++; // finish the last byte if we only got a nibble
             }
             data->chk = d[-1];
             data->chk16 = (d[-2] << 8) | d[-1];
+            data->bit_len = bit_len;
             data++;
 
             cnt++;

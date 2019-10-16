@@ -76,6 +76,66 @@ static void trim_bits(int bits)
     }
 }
 
+// find offset, limited to 64 bits for now
+static int find_offset(struct data *d, struct data *f)
+{
+    if (f->bit_len > 64) {
+        fprintf(stderr, "sync prefix too long (%u bits, max 64 bits)\n", f->bit_len);
+        exit(1);
+    }
+
+    uint64_t test = 0;
+    uint64_t patt = 0;
+    uint64_t mask = (uint64_t)-1 << (64 - f->bit_len);
+    // fill pattern from MSB down
+    for (unsigned i = 0; i < (f->bit_len + 7) / 8; ++i)
+        patt |= (uint64_t)f->d[i] << (7 - i) * 8;
+    // fill test from MSB down
+    for (unsigned i = 0; i < (d->bit_len + 7) / 8 && i < 8; ++i)
+        test |= (uint64_t)d->d[i] << (7 - i) * 8;
+
+    for (int pos = 0; pos < (int)d->bit_len - (int)f->bit_len; ++pos) {
+        //printf("? %3d %016llx %016llx %016llx %016llx\n", pos, test, patt, mask, ((test ^ patt) & mask));
+        if (((test ^ patt) & mask) == 0) {
+            //printf("! %3d %016llx %016llx %016llx\n", pos, test, patt, mask);
+            return pos;
+        }
+        test <<= 1;
+        // TODO: refill bits now
+    }
+    return -1; // not found
+}
+
+static void sync_bits(struct data *f)
+{
+    if (!f || !f->bit_len)
+        return;
+
+    int m = 0;
+    for (int j = 0; j < list_len; ++j) {
+        int offs = find_offset(&data[j], f);
+        if (offs < 0)
+            continue; // not matching
+
+        // shift left
+        int bytes    = offs / 8;
+        int msgj_len = (data[j].bit_len - offs + 7) / 8;
+        int bits     = offs % 8;
+
+        memmove(data[j].d, &data[j].d[bytes], msgj_len);
+        memset(&data[j].d[msgj_len], 0, bytes);
+        for (int k = 0; k < msgj_len; ++k) {
+            data[j].d[k] <<= bits;
+            data[j].d[k] |= data[j].d[k + 1] >> (8 - bits);
+        }
+
+        // move up
+        memmove(&data[m], &data[j], sizeof(struct data));
+        m++;
+    }
+    list_len = m;
+}
+
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
@@ -88,6 +148,7 @@ int main(int argc, char const *argv[])
     unsigned verbose = 0;
     int shift_n = 0;
     int trim_n = 0;
+    struct data find_d = {0};
 
     int i = 1;
     for (; i < argc; ++i) {
@@ -101,6 +162,8 @@ int main(int argc, char const *argv[])
             shift_n = atoi(argv[++i]);
         else if (argv[i][1] == 't')
             trim_n = atoi(argv[++i]);
+        else if (argv[i][1] == 'f')
+            parse_code(argv[++i], &find_d);
         else {
             fprintf(stderr, "Wrong argument (%s).\n", argv[i]);
             usage(argc, argv);
@@ -119,6 +182,8 @@ int main(int argc, char const *argv[])
         fprintf(stderr, "Message length too short!\n");
         usage(argc, argv);
     }
+
+    sync_bits(&find_d);
 
     if (verbose)
         fprintf(stderr, "Shifting all rows by %d bits, trimming %d bits...\n", shift_n, trim_n);

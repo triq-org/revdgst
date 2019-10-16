@@ -17,14 +17,25 @@
 #include <stdint.h>
 
 #define LINE_MAX 255
-#define MSG_MAX 13
-#define LIST_MAX 4096
+#define MSG_MAX 19
+#define LIST_MAX 65536
 
 struct data {
     uint8_t d[MSG_MAX];
     uint8_t chk;
     uint16_t chk16;
+    uint16_t bit_len;
+    char *comment;
 };
+
+struct data_list {
+    struct data data[LIST_MAX];
+    unsigned msg_len;
+    unsigned list_len;
+    char *text;
+};
+
+int parse_code(char const *text, struct data *data);
 
 int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsigned msg_max, unsigned list_max);
 
