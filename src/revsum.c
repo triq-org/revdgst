@@ -193,22 +193,68 @@ static void crc_scan(unsigned off, unsigned len, unsigned chk)
     }
 }
 
+
+__attribute__((always_inline))
+static inline uint8_t xor_shift_bytes(uint8_t const message[], unsigned num_bytes, int shifts)
+{
+    uint8_t result = 0;
+    for(unsigned i = 0 ; i < num_bytes; ++i) {
+        result ^= message[i] ;
+        if (shifts > 0)
+            result ^= (( result ^ ( result << shifts )) & 0x0F) << 4 ;
+        else
+            result ^= (( result ^ ( result >> (shifts*-1) )) & 0x0F) << 4 ;
+    }
+    return result;
+}
+
+static void xor_shift(unsigned off, unsigned len, unsigned chk)
+{
+    for (int shift = -4; shift <= 4; ++shift) {
+        int found_max = 0;
+        int found_shift = 0;
+
+        for (int i = 0; i < list_len; ++i) {
+            int found = 0;
+            uint8_t chki = xor_shift_bytes(&data[i].d[off], len, shift) ^ data[i].d[chk];
+
+            for (int j = 0; j < list_len; ++j) {
+                uint8_t chkj = xor_shift_bytes(&data[j].d[off], len, shift) ^ data[j].d[chk];
+                if (chki == chkj) {
+                    found++;
+                }
+            }
+
+            if (found > found_max) {
+                found_max = found;
+                found_shift = shift;
+            }
+        }
+
+        if (found_max > min_matches) {
+            printf("Found: xor_shift(&b[%u], %u, %d) ^ b[%u] == 0; // (%.1f%%)\n",
+                    off, len, found_shift, chk, found_max * 100.0 / list_len);
+        }
+    }
+}
+
 static void run_algos(unsigned off, unsigned len, unsigned chk)
 {
     byte_sums(off, len, chk);
     nibble_sums(off, len, chk);
     crc_scan(off, len, chk);
+    xor_shift(off, len, chk);
 }
 
 static void scan_algos()
 {
-    fprintf(stderr, "\nComplete message...\n");
+    fprintf(stderr, "Complete message...\n");
     run_algos(0, msg_len - 1, msg_len - 1);
 
-    fprintf(stderr, "\nSkipping first byte...\n");
+    fprintf(stderr, "Skipping first byte...\n");
     run_algos(1, msg_len - 2, msg_len - 1);
 
-    fprintf(stderr, "\nOmitting last byte...\n");
+    fprintf(stderr, "Omitting last byte...\n");
     run_algos(0, msg_len - 2, msg_len - 2);
 }
 
@@ -259,23 +305,23 @@ int main(int argc, char const *argv[])
 
     row_weight();
 
-    fprintf(stderr, "\nProcessing...\n");
+    fprintf(stderr, "Processing...\n");
     scan_algos();
 
-    fprintf(stderr, "\nINVERT Inverting...\n");
+    fprintf(stderr, "INVERT Inverting...\n");
     for (int j = 0; j < list_len; ++j) {
         invert_bytes(data[j].d, msg_len);
     }
     scan_algos();
 
-    fprintf(stderr, "\nBYTE_REFLECT Reflecting...\n");
+    fprintf(stderr, "BYTE_REFLECT Reflecting...\n");
     for (int j = 0; j < list_len; ++j) {
         invert_bytes(data[j].d, msg_len);
         reflect_bytes(data[j].d, msg_len);
     }
     scan_algos();
 
-    fprintf(stderr, "\nINVERT BYTE_REFLECT Inverting...\n");
+    fprintf(stderr, "INVERT BYTE_REFLECT Inverting...\n");
     for (int j = 0; j < list_len; ++j) {
         invert_bytes(data[j].d, msg_len);
     }
