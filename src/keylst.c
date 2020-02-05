@@ -155,7 +155,7 @@ int main(int argc, char const *argv[])
             return -1;
         }
         if (argv[i][1] == 'v')
-            verbose = 1;
+            verbose++;
         else if (argv[i][1] == 'r')
             reverse = 1;
         else if (argv[i][1] == 'G')

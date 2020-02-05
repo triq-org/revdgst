@@ -496,7 +496,7 @@ int main(int argc, char const *argv[])
         if (argv[i][1] == 'h')
             usage(argc, argv);
         else if (argv[i][1] == 'v')
-            verbose = 1;
+            verbose++;
         else if (argv[i][1] == 's')
             parallel = 0;
         else if (argv[i][1] == 'p')

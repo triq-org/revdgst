@@ -218,7 +218,7 @@ int main(int argc, char const *argv[])
         if (argv[i][1] == 'h')
             usage(argc, argv);
         else if (argv[i][1] == 'v')
-            verbose = 1;
+            verbose++;
         else if (argv[i][1] == 'b')
             bits = atoi(argv[++i]);
         else if (argv[i][1] == 'c')

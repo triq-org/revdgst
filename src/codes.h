@@ -32,7 +32,7 @@ struct data_list {
     struct data data[LIST_MAX];
     unsigned msg_len;
     unsigned list_len;
-    char *text;
+    char *header;
 };
 
 int parse_code(char const *text, struct data *data);
@@ -42,5 +42,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
 int sprint_code(char *dst, struct data *data, unsigned msg_len);
 
 void print_codes(struct data *data, unsigned msg_len, unsigned list_len);
+
+void free_codes(struct data *data, unsigned list_len);
 
 #endif /* INCLUDE_CODES_H_ */

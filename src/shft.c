@@ -20,6 +20,22 @@ static struct data data[LIST_MAX];
 static unsigned msg_len  = 0;
 static unsigned list_len = 0;
 
+static void invert_bits(void)
+{
+    for (int i = 0; i < list_len; ++i) {
+        struct data *d = &data[i];
+        // flip whole bytes
+        for (int k = 0; k < (d->bit_len / 8); ++k) {
+            d->d[k] ^= 0xff;
+        }
+        // flip remainder
+        d->d[(d->bit_len / 8)] ^= 0xff << (8 - d->bit_len % 8);
+        // flip checksums
+        d->chk ^= 0xff;
+        d->chk16 ^= 0xffff;
+    }
+}
+
 static void shift_bits(int bits)
 {
     if (bits > 0) {
@@ -139,13 +155,14 @@ static void sync_bits(struct data *f)
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
-    fprintf(stderr, "%s: [-s x] [-t x] codes.txt\n", argv[0]);
+    fprintf(stderr, "%s: [-s x] [-t x] [-f x] [-i] codes.txt\n", argv[0]);
     exit(1);
 }
 
 int main(int argc, char const *argv[])
 {
     unsigned verbose = 0;
+    int invert = 0;
     int shift_n = 0;
     int trim_n = 0;
     struct data find_d = {0};
@@ -157,7 +174,9 @@ int main(int argc, char const *argv[])
         if (argv[i][1] == 'h')
             usage(argc, argv);
         else if (argv[i][1] == 'v')
-            verbose = 1;
+            verbose++;
+        else if (argv[i][1] == 'i')
+            invert++;
         else if (argv[i][1] == 's')
             shift_n = atoi(argv[++i]);
         else if (argv[i][1] == 't')
@@ -182,6 +201,9 @@ int main(int argc, char const *argv[])
         fprintf(stderr, "Message length too short!\n");
         usage(argc, argv);
     }
+
+    if (invert & 1)
+        invert_bits();
 
     sync_bits(&find_d);
 

@@ -10,6 +10,7 @@
 */
 
 #include "codes.h"
+#include <string.h>
 
 int parse_code(char const *text, struct data *data)
 {
@@ -73,6 +74,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
     FILE *fp;
     char line[LINE_MAX];
     int multiline_comment = 0;
+    int bracket_comment = 0;
     unsigned cnt = 0;
     unsigned c_len = 0;
 
@@ -91,8 +93,30 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
         uint8_t *d = data->d;
         unsigned nibble = 0;
         int bit_len = -1;
+        char *cmt = NULL;
         for (char *p = line; *p; ++p) {
-            // skip multiline comment
+            // skip bracket comment, can be nested
+            if (*p == '[') {
+                bracket_comment++;
+                p++;
+            }
+            while (bracket_comment) {
+                while (*p && *p != ']') {
+                    if (*p == '[')
+                        bracket_comment++;
+                    p++;
+                }
+                if (*p == ']') {
+                    bracket_comment--;
+                    p++;
+                }
+                if (!*p)
+                    break;
+            }
+            if (!*p)
+                continue;
+
+            // skip multiline comment, cannot be nested
             if (*p == '/' && p[1] == '*') {
                 multiline_comment = 1;
                 p += 2;
@@ -109,9 +133,12 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
             }
 
             // end at comments
-            if (*p == ';' || *p == '#')
+            if (*p == ';' || *p == '#') {
+                cmt = p;
                 break;
+            }
             if (*p == '/' && p[1] == '/') {
+                cmt = p;
                 p++;
                 break;
             }
@@ -167,6 +194,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
             data->chk = d[-1];
             data->chk16 = (d[-2] << 8) | d[-1];
             data->bit_len = bit_len;
+            data->comment = cmt ? strdup(cmt) : NULL;
             data++;
 
             cnt++;
@@ -187,11 +215,15 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
 
 int sprint_code(char *dst, struct data *data, unsigned msg_len)
 {
+    if (!msg_len) {
+        return 0;
+    }
     int r = 0;
     for (unsigned j = 0; j < msg_len; ++j) {
         r += sprintf(dst, "%02x ", data->d[j]);
         dst += 3;
     }
+    dst[-1] = '\0';
     return r;
 }
 
@@ -202,7 +234,19 @@ void print_codes(struct data *data, unsigned msg_len, unsigned list_len)
     for (unsigned i = 0; i < list_len; ++i) {
         sprint_code(buf, data, msg_len);
         //printf("%s ; %02x %04x\n", buf, data->chk, data->chk16);
-        printf("%s\n", buf);
+        if (data->comment)
+            printf("%s %s", buf, data->comment);
+        else
+            printf("%s\n", buf);
+        data++;
+    }
+}
+
+void free_codes(struct data *data, unsigned list_len)
+{
+    // free(text);
+    for (unsigned i = 0; i < list_len; ++i) {
+        free(data->comment);
         data++;
     }
 }
