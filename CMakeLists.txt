@@ -123,6 +123,9 @@ target_link_libraries(revdgst16 ${TOOLS_LIBS})
 add_executable(keylst src/keylst.c ${COMMON_SOURCES})
 target_link_libraries(keylst ${TOOLS_LIBS})
 
+add_executable(chkcrc src/chkcrc.c ${COMMON_SOURCES})
+target_link_libraries(chkcrc ${TOOLS_LIBS})
+
 ########################################################################
 # Install executables
 ########################################################################
