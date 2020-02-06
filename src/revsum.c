@@ -193,47 +193,52 @@ static void crc_scan(unsigned off, unsigned len, unsigned chk)
     }
 }
 
-
 __attribute__((always_inline))
-static inline uint8_t xor_shift_bytes(uint8_t const message[], unsigned num_bytes, int shifts)
+static inline uint8_t xor_shift_bytes(uint8_t const message[], unsigned num_bytes, uint8_t shift_up, uint8_t shift_dn)
 {
     uint8_t result = 0;
-    for(unsigned i = 0 ; i < num_bytes; ++i) {
-        result ^= message[i] ;
-        if (shifts > 0)
-            result ^= (( result ^ ( result << shifts )) & 0x0F) << 4 ;
-        else
-            result ^= (( result ^ ( result >> (shifts*-1) )) & 0x0F) << 4 ;
+    for (unsigned i = 0 ; i < num_bytes; ++i) {
+        result ^= message[i];
+        for (unsigned j = 0; j < 7; ++j) {
+            if (shift_up & (1 << j))
+                result ^= result << (j + 1);
+            if (shift_dn & (1 << j))
+                result ^= result >> (j + 1);
+        }
     }
     return result;
 }
 
 static void xor_shift(unsigned off, unsigned len, unsigned chk)
 {
-    for (int shift = -4; shift <= 4; ++shift) {
-        int found_max = 0;
-        int found_shift = 0;
+    for (int shift_up = 0; shift_up <= 127; ++shift_up) {
+        for (int shift_dn = 0; shift_dn <= 127; ++shift_dn) {
+            int found_max = 0;
+            int found_shift_up = 0;
+            int found_shift_dn = 0;
 
-        for (int i = 0; i < list_len; ++i) {
-            int found = 0;
-            uint8_t chki = xor_shift_bytes(&data[i].d[off], len, shift) ^ data[i].d[chk];
+            for (int i = 0; i < list_len; ++i) {
+                int found = 0;
+                uint8_t chki = xor_shift_bytes(&data[i].d[off], len, shift_up, shift_dn) ^ data[i].d[chk];
 
-            for (int j = 0; j < list_len; ++j) {
-                uint8_t chkj = xor_shift_bytes(&data[j].d[off], len, shift) ^ data[j].d[chk];
-                if (chki == chkj) {
-                    found++;
+                for (int j = 0; j < list_len; ++j) {
+                    uint8_t chkj = xor_shift_bytes(&data[j].d[off], len, shift_up, shift_dn) ^ data[j].d[chk];
+                    if (chki == chkj) {
+                        found++;
+                    }
+                }
+
+                if (found > found_max) {
+                    found_max = found;
+                    found_shift_up = shift_up;
+                    found_shift_dn = shift_dn;
                 }
             }
 
-            if (found > found_max) {
-                found_max = found;
-                found_shift = shift;
+            if (found_max > min_matches) {
+                printf("Found: xor_shift_bytes(&b[%u], %u, 0x%02x, 0x%02x) ^ b[%u] == 0; // (%.1f%%)\n",
+                        off, len, found_shift_up, found_shift_dn, chk, found_max * 100.0 / list_len);
             }
-        }
-
-        if (found_max > min_matches) {
-            printf("Found: xor_shift(&b[%u], %u, %d) ^ b[%u] == 0; // (%.1f%%)\n",
-                    off, len, found_shift, chk, found_max * 100.0 / list_len);
         }
     }
 }
