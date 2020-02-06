@@ -199,11 +199,12 @@ static inline uint8_t xor_shift_bytes(uint8_t const message[], unsigned num_byte
     uint8_t result = 0;
     for (unsigned i = 0 ; i < num_bytes; ++i) {
         result ^= message[i];
+        uint8_t tmp = result;
         for (unsigned j = 0; j < 7; ++j) {
             if (shift_up & (1 << j))
-                result ^= result << (j + 1);
+                result ^= tmp << (j + 1);
             if (shift_dn & (1 << j))
-                result ^= result >> (j + 1);
+                result ^= tmp >> (j + 1);
         }
     }
     return result;
