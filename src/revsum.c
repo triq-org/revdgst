@@ -166,7 +166,8 @@ static void crc_scan(unsigned off, unsigned len, unsigned chk)
     for (int p = 1; p <= 255; ++p) {
         int found_max = 0;
         int found_poly = 0;
-        int found_init = 0;
+        int found_fin = 0;
+        int found_init = -1;
 
         for (int i = 0; i < list_len; ++i) {
             int found = 0;
@@ -182,13 +183,34 @@ static void crc_scan(unsigned off, unsigned len, unsigned chk)
             if (found > found_max) {
                 found_max = found;
                 found_poly = p;
-                found_init = chki;
+                found_fin = chki; // final xor for random init of 0x00
             }
         }
 
         if (found_max > min_matches) {
-            printf("Found: crc8(&b[%u], %u, 0x%02x, 0x%02x) ^ b[%u] == 0; // (%.1f%%)\n",
-                    off, len, found_poly, found_init, chk, found_max * 100.0 / list_len);
+            // recover the init
+            for (int q = 0; q <= 255; ++q) {
+                int init_match = 0;
+                for (int j = 0; j < list_len; ++j) {
+                    uint8_t chkj = crc8(&data[j].d[off], len, p, q) ^ data[j].d[chk];
+                    if (chkj == 0) {
+                        init_match++;
+                    }
+                }
+                if (init_match == found_max) {
+                    found_init = q;
+                    break;
+                }
+            }
+
+            if (found_init >= 0) {
+                printf("Found: crc8(&b[%u], %u, 0x%02x, 0x%02x) == b[%u]; // (%.1f%%)\n",
+                        off, len, found_poly, found_init, chk, found_max * 100.0 / list_len);
+            }
+            else {
+                printf("Found: crc8(&b[%u], %u, 0x%02x, 0x%02x) ^ b[%u] == 0x%02x; // (%.1f%%)\n",
+                        off, len, found_poly, 0, chk, found_fin, found_max * 100.0 / list_len);
+            }
         }
     }
 }
