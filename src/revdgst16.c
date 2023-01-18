@@ -60,7 +60,7 @@ static inline void algo_lfsr_digest16(uint8_t *msg, unsigned bytes, uint16_t gen
     }
 }
 
-#define DONE(msg) do { ++found; printf("Done with g %04x k %04x using %s\n", g, k, msg); } while (0)
+#define DONE(fin, msg) do { ++found; printf("Done with g %04x k %04x final %04x using %s\n", g, k, fin, msg); } while (0)
 
 static struct data data[LIST_MAX];
 static unsigned msg_len  = 0;
@@ -126,12 +126,12 @@ static int runner(int offset)
                 }
             }
 
-            if (fsx) DONE("sum xor");
-            if (fxx) DONE("xor xor");
-            if (fsa) DONE("sum add");
-            if (fxa) DONE("xor add");
-            if (fss) DONE("sum sub");
-            if (fxs) DONE("xor sub");
+            if (fsx) DONE(rsx, "sum xor");
+            if (fxx) DONE(rxx, "xor xor");
+            if (fsa) DONE(rsa, "sum add");
+            if (fxa) DONE(rxa, "xor add");
+            if (fss) DONE(rss, "sum sub");
+            if (fxs) DONE(rxs, "xor sub");
         }
     }
 

@@ -1,7 +1,7 @@
 ########################################################################
 # Project setup
 ########################################################################
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 3.0.0)
 project(revdgst C)
 
 #select the release build type by default to get optimization flags
@@ -129,4 +129,4 @@ target_link_libraries(chkcrc ${TOOLS_LIBS})
 ########################################################################
 # Install executables
 ########################################################################
-install(TARGETS bitbrk revdgst revdgst16 DESTINATION bin)
+install(TARGETS shft bitbrk revsum revdgst revdgst16 keylst chkcrc DESTINATION bin)

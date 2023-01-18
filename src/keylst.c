@@ -43,7 +43,7 @@ static void lfsr_fib8_keys(int verbose, int rev, uint8_t taps, uint8_t init)
                 key = (key >> 1);
         }
         ++rounds;
-    } while (key && key != init);
+    } while (rounds < 256 && key && key != init);
     fprintf(stderr, "\n");
 }
 
@@ -71,7 +71,7 @@ static void lfsr_gal8_keys(int verbose, int rev, uint8_t gen, uint8_t init)
                 key = (key >> 1);
         }
         ++rounds;
-    } while (key && key != init);
+    } while (rounds < 256 && key && key != init);
     fprintf(stderr, "\n");
 }
 
