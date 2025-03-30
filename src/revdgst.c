@@ -339,8 +339,8 @@ static unsigned min_matches = 0;
 __attribute__((always_inline))
 static inline void *runner(int algo, int y_rev, int i_rev, int rev)
 {
-    for (int g = 0; g <= 0xff; ++g) {
-        for (int k = 0; k <= 0xff; ++k) {
+    for (unsigned g = 0; g <= 0xff; ++g) {
+        for (unsigned k = 0; k <= 0xff; ++k) {
             struct data rd = data[0];
             uint8_t rs;
             uint8_t rx;

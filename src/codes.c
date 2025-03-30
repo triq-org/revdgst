@@ -53,7 +53,7 @@ int parse_code(char const *text, struct data *data)
         }
         nibble++;
         if (nibble / 2 >= MSG_MAX) {
-            fprintf(stderr, "Maximum number of msg bytes (%u) reached.\n", MSG_MAX);
+            fprintf(stderr, "Maximum number of msg bytes (%u) reached.\n", (unsigned)MSG_MAX);
             break;
         }
     }

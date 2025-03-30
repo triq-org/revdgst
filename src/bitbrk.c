@@ -22,7 +22,7 @@ static struct data data[LIST_MAX];
 static unsigned msg_len  = 0;
 static unsigned list_len = 0;
 
-static void single_bits()
+static void single_bits(void)
 {
     char bufi[MSG_MAX * 3 + 1] = {0};
     char bufj[MSG_MAX * 3 + 1] = {0};
@@ -90,7 +90,7 @@ static void n_bits(unsigned bits)
     }
 }
 
-static void all_collisions()
+static void all_collisions(void)
 {
     char bufi[MSG_MAX * 3 + 1] = {0};
     char bufj[MSG_MAX * 3 + 1] = {0};
@@ -113,7 +113,7 @@ static void all_collisions()
 }
 
 // locate a single bit change, augment keystream, repeat.
-static void key_brk()
+static void key_brk(void)
 {
     unsigned bit_len = msg_len * 8;
     int *keystream;
@@ -156,8 +156,8 @@ static void key_brk()
             for (int i = 0; i < 256; ++i) {
                 if (hits_tab[i]) {
                     double hit_pct = (double)hits_tab[i] / hit_count;
-                    printf("; %2d : key %02x (%d/%d %.0f%%)\n",
-                            k, i, hits_tab[i], hit_count, 100.0 * hit_pct);
+                    printf("; %2d : key %02x (%u/%u %.0f%%)\n",
+                            k, (unsigned)i, hits_tab[i], hit_count, 100.0 * hit_pct);
                     if (hit_pct > 0.5)
                         keystream[k] = i;
                 }
@@ -182,10 +182,10 @@ static void key_brk()
     printf("; remaining data bits\n");
     print_codes(data, msg_len + 1, list_len);
 
-    printf("; keystream for %d bits\n", bit_len);
+    printf("; keystream for %u bits\n", bit_len);
     for (int k = 0; k < bit_len; ++k) {
         if (keystream[k] >= 0)
-            printf("; 0x%02x, // key at bit %d\n", keystream[k], k);
+            printf("; 0x%02x, // key at bit %d\n", (unsigned)keystream[k], k);
         else
             printf("; 0, // key at bit %d not found\n", k);
     }

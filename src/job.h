@@ -42,7 +42,7 @@ static void job_exec_sequential(int (*call)(int))
     }
 }
 
-static int job_default_thread_count()
+static int job_default_thread_count(void)
 {
     return sysconf(_SC_NPROCESSORS_ONLN); // Get the number of logical CPUs.
 }

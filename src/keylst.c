@@ -23,7 +23,7 @@ static void lfsr_fib8_keys(int verbose, int rev, uint8_t taps, uint8_t init)
     unsigned rounds = 0;
     do {
         if (verbose)
-            fprintf(stderr, "Fibonacci key at round %3d : %02x\n", rounds, key);
+            fprintf(stderr, "Fibonacci key at round %3u : %02x\n", rounds, key);
         else
             fprintf(stderr, "%02x ", key);
         // e.g. (Fibonacci LFSR)
@@ -55,7 +55,7 @@ static void lfsr_gal8_keys(int verbose, int rev, uint8_t gen, uint8_t init)
     unsigned rounds = 0;
     do {
         if (verbose)
-            fprintf(stderr, "Galois key at round %3d : %02x\n", rounds, key);
+            fprintf(stderr, "Galois key at round %3u : %02x\n", rounds, key);
         else
             fprintf(stderr, "%02x ", key);
         if (rev) {
@@ -83,7 +83,7 @@ static void lfsr_fib16_keys(int verbose, int rev, uint16_t taps, uint16_t init)
     unsigned rounds = 0;
     do {
         if (verbose)
-            fprintf(stderr, "Fibonacci key at round %3d : %04x\n", rounds, key);
+            fprintf(stderr, "Fibonacci key at round %3u : %04x\n", rounds, key);
         else
             fprintf(stderr, "%04x ", key);
         // e.g. (Fibonacci LFSR)
@@ -115,7 +115,7 @@ static void lfsr_gal16_keys(int verbose, int rev, uint16_t gen, uint16_t init)
     unsigned rounds = 0;
     do {
         if (verbose)
-            fprintf(stderr, "Galois key at round %3d : %04x\n", rounds, key);
+            fprintf(stderr, "Galois key at round %3u : %04x\n", rounds, key);
         else
             fprintf(stderr, "%04x ", key);
         if (rev) {

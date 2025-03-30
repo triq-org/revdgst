@@ -32,7 +32,7 @@ Remember to add any new algorithm to run_algos().
 If you want to scan different parts of the messages change scan_algos().
 */
 
-static void row_weight()
+static void row_weight(void)
 {
     unsigned max_weight = 0;
     unsigned min_weight = msg_len * 8;

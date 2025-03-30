@@ -38,14 +38,14 @@
 static clock_t start_time_real;
 
 /// Capture overall process time used, in the style of "time" command.
-static void start_runtimes()
+static void start_runtimes(void)
 {
     struct tms tms;
     start_time_real = times(&tms);
 }
 
 /// Print overall process time used, in the style of "time" command.
-static void print_runtimes()
+static void print_runtimes(void)
 {
     struct tms tms;
     clock_t time_real = times(&tms);

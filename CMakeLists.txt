@@ -1,7 +1,7 @@
 ########################################################################
 # Project setup
 ########################################################################
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.10)
 project(revdgst C)
 
 #select the release build type by default to get optimization flags
@@ -43,7 +43,7 @@ message(STATUS "CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
 
 # target_compile_definitions was only added with CMake 2.8.11
 #if(THREADS_FOUND)
-#	set_target_properties(tx_srv PROPERTIES COMPILE_DEFINITIONS "THREADS")
+#    set_target_properties(tx_srv PROPERTIES COMPILE_DEFINITIONS "THREADS")
 #endif()
 #if(THREADS_HAVE_PTHREAD_ARG)
 #    set_target_properties(tx_srv PROPERTIES COMPILE_OPTIONS "-pthread")
@@ -79,6 +79,10 @@ if (("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" MATCHES
     ADD_DEFINITIONS(-pedantic)
     ADD_DEFINITIONS(-Wall)
     ADD_DEFINITIONS(-Wextra)
+    # somehow C99 is not picked up by Clang, so this is needed
+    ADD_DEFINITIONS(-Wno-declaration-after-statement)
+    ADD_DEFINITIONS(-Wno-unsafe-buffer-usage)
+    ADD_DEFINITIONS(-Wno-deprecated-declarations)
     ADD_DEFINITIONS(-Wno-sign-compare)
     ADD_DEFINITIONS(-Wno-unused-parameter)
     ADD_DEFINITIONS(-Wno-unused-function)

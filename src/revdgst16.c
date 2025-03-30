@@ -75,8 +75,8 @@ static int runner(int offset)
         return numofthreads;
     int step = numofthreads;
 
-    for (int g=0x8000 + offset; !found && g <= 0xffff; g += step) {
-        for (int k = 0; k <= 0xffff; ++k) {
+    for (unsigned g=0x8000 + offset; !found && g <= 0xffff; g += step) {
+        for (unsigned k = 0; k <= 0xffff; ++k) {
             struct data rd = data[0];
             uint16_t rs;
             uint16_t rx;
