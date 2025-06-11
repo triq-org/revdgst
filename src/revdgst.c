@@ -39,7 +39,7 @@ static inline void algo_fletcher8(int y_rev, int i_rev, int rev,
     if (y_rev) {
         y_min = bytes - 1; y_max = -1; y_step = -1;
     } else {
-        y_min = 0; y_max = bytes-1; y_step = 1;
+        y_min = 0; y_max = bytes; y_step = 1;
     }
 
     uint8_t c0 = key & 0xf;
@@ -74,7 +74,7 @@ static inline void algo_shift16_8(int y_rev, int i_rev, int rev,
     if (y_rev) {
         y_min = bytes - 1; y_max = -1; y_step = -1;
     } else {
-        y_min = 0; y_max = bytes-1; y_step = 1;
+        y_min = 0; y_max = bytes; y_step = 1;
     }
 
     int i_min, i_max, i_step;
@@ -124,7 +124,7 @@ static inline void algo_elcheapo8(int y_rev, int i_rev, int rev,
     if (y_rev) {
         y_min = bytes - 1; y_max = -1; y_step = -1;
     } else {
-        y_min = 0; y_max = bytes-1; y_step = 1;
+        y_min = 0; y_max = bytes; y_step = 1;
     }
 
     unsigned sum = key;
@@ -153,7 +153,7 @@ static inline void algo_crc8(int y_rev, int i_rev, int rev,
     if (y_rev) {
         y_min = bytes - 1; y_max = -1; y_step = -1;
     } else {
-        y_min = 0; y_max = bytes-1; y_step = 1;
+        y_min = 0; y_max = bytes; y_step = 1;
     }
 
     int i_min, i_max, i_step;
@@ -204,7 +204,7 @@ static inline void algo_lfsr_digest8_galois(int y_rev, int i_rev, int rev,
     if (y_rev) {
         y_min = bytes - 1; y_max = -1; y_step = -1;
     } else {
-        y_min = 0; y_max = bytes-1; y_step = 1;
+        y_min = 0; y_max = bytes; y_step = 1;
     }
 
     int i_min, i_max, i_step;
@@ -264,7 +264,7 @@ static inline void algo_lfsr_digest8_fibonacci(int y_rev, int i_rev, int rev,
     if (y_rev) {
         y_min = bytes - 1; y_max = -1; y_step = -1;
     } else {
-        y_min = 0; y_max = bytes-1; y_step = 1;
+        y_min = 0; y_max = bytes; y_step = 1;
     }
 
     int i_min, i_max, i_step;
