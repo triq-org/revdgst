@@ -28,9 +28,9 @@ static void single_bits(void)
     char bufj[MSG_MAX * 3 + 1] = {0};
     printf("k : codei  chki  ->  codej  chkj  |  chki^chkj chki+chkj chki-chkj\n");
 
-    for (int k = 0; k < msg_len * 8; ++k) {
-        for (int i = 0; i < list_len; ++i) {
-            uint8_t *codei = data[i].d;
+    for (unsigned k = 0; k < msg_len * 8; ++k) {
+        for (unsigned i = 0; i < list_len; ++i) {
+            uint8_t const *codei = data[i].d;
             uint8_t chki   = data[i].chk;
 
             uint8_t codex[MSG_MAX];
@@ -40,16 +40,16 @@ static void single_bits(void)
             //uint8_t byte = 1 << (k & 7); // MOD 8
             //uint8_t nibble = 1 << (k & 3); // MOD 4
 
-            for (int j = i + 1; j < list_len; ++j) {
-                uint8_t *codej = data[j].d;
+            for (unsigned j = i + 1; j < list_len; ++j) {
+                uint8_t const *codej = data[j].d;
                 uint8_t chkj     = data[j].chk;
 
                 if (!memcmp(codex, codej, msg_len)) {
                     sprint_code(bufi, &data[i], msg_len);
                     sprint_code(bufj, &data[j], msg_len);
-                    printf("%2d : %s %02x  ->  %s %02x  |  %02x %02x %02x\n",
+                    printf("%2u : %s %02x  ->  %s %02x  |  %02x %02x %02x\n",
                             k, bufi, chki, bufj, chkj,
-                            chki ^ chkj, chki + chkj, chki - chkj);
+                            (uint8_t)(chki ^ chkj), (uint8_t)(chki + chkj), (u_int8_t)(chki - chkj));
                 }
             }
         }
@@ -63,15 +63,15 @@ static void n_bits(unsigned bits)
     char bufx[MSG_MAX * 3 + 1] = {0};
     printf("k : codei  chki  ->  codej  chkj  |  chki^chkj chki+chkj chki-chkj\n");
 
-    for (int i = 0; i < list_len; ++i) {
-        uint8_t *codei = data[i].d;
+    for (unsigned i = 0; i < list_len; ++i) {
+        uint8_t const *codei = data[i].d;
         uint8_t chki   = data[i].chk;
 
-        for (int j = i + 1; j < list_len; ++j) {
-            uint8_t *codej = data[j].d;
+        for (unsigned j = i + 1; j < list_len; ++j) {
+            uint8_t const *codej = data[j].d;
             uint8_t chkj   = data[j].chk;
 
-            int pop = 0;
+            unsigned pop = 0;
             struct data datax;
             for (unsigned k = 0; k < msg_len; ++k) {
                 datax.d[k] = codei[k] ^ codej[k];
@@ -84,7 +84,7 @@ static void n_bits(unsigned bits)
                 sprint_code(bufx, &datax, msg_len);
                 printf("%s: %s %02x  ->  %s %02x  |  %02x %02x %02x\n",
                         bufx, bufi, chki, bufj, chkj,
-                        chki ^ chkj, chki + chkj, chki - chkj);
+                        (uint8_t)(chki ^ chkj), (uint8_t)(chki + chkj), (uint8_t)(chki - chkj));
             }
         }
     }
@@ -96,10 +96,10 @@ static void all_collisions(void)
     char bufj[MSG_MAX * 3 + 1] = {0};
     printf("codei  chki  ->  codej  chkj\n");
 
-    for (int i = 0; i < list_len; ++i) {
+    for (unsigned i = 0; i < list_len; ++i) {
         uint8_t chki = data[i].chk;
 
-        for (int j = i + 1; j < list_len; ++j) {
+        for (unsigned j = i + 1; j < list_len; ++j) {
             uint8_t chkj = data[j].chk;
 
             if (chki == chkj) {
@@ -120,26 +120,25 @@ static void key_brk(void)
     keystream = malloc(bit_len * sizeof(int));
     memset(keystream, -1, bit_len * sizeof(int));
 
-    unsigned found;
     unsigned hits_tab[256];
 
-    for (int round = 0; round < bit_len; ++round) {
+    for (unsigned round = 0; round < bit_len; ++round) {
         // find a single bit change
-        found = 0;
-        for (int k = 0; k < bit_len; ++k) {
+        unsigned found = 0;
+        for (unsigned k = 0; k < bit_len; ++k) {
             memset(hits_tab, 0, sizeof(hits_tab));
             unsigned hit_count = 0;
 
-            for (int i = 0; i < list_len; ++i) {
-                uint8_t *codei = data[i].d;
+            for (unsigned i = 0; i < list_len; ++i) {
+                uint8_t const *codei = data[i].d;
                 uint8_t chki   = data[i].chk;
 
                 uint8_t codex[MSG_MAX];
                 memcpy(codex, codei, msg_len);
                 codex[k / 8] ^= 1 << (7 - k % 8); // MSB to LSB
 
-                for (int j = i + 1; j < list_len; ++j) {
-                    uint8_t *codej = data[j].d;
+                for (unsigned j = i + 1; j < list_len; ++j) {
+                    uint8_t const *codej = data[j].d;
                     uint8_t chkj   = data[j].chk;
 
                     if (!memcmp(codex, codej, msg_len)) {
@@ -156,7 +155,7 @@ static void key_brk(void)
             for (int i = 0; i < 256; ++i) {
                 if (hits_tab[i]) {
                     double hit_pct = (double)hits_tab[i] / hit_count;
-                    printf("; %2d : key %02x (%u/%u %.0f%%)\n",
+                    printf("; %2u : key %02x (%u/%u %.0f%%)\n",
                             k, (unsigned)i, hits_tab[i], hit_count, 100.0 * hit_pct);
                     if (hit_pct > 0.5)
                         keystream[k] = i;
@@ -167,8 +166,8 @@ static void key_brk(void)
             break;
 
         // apply keystream
-        for (int i = 0; i < list_len; ++i) {
-            for (int k = 0; k < bit_len; ++k) {
+        for (unsigned i = 0; i < list_len; ++i) {
+            for (unsigned k = 0; k < bit_len; ++k) {
                 uint8_t bit = 1 << (7 - (k % 8)); // msb to lsb
                 if (keystream[k] >= 0 && data[i].d[k / 8] & bit) {
                     data[i].d[k / 8] ^= bit;
@@ -183,11 +182,11 @@ static void key_brk(void)
     print_codes(data, msg_len + 1, list_len);
 
     printf("; keystream for %u bits\n", bit_len);
-    for (int k = 0; k < bit_len; ++k) {
+    for (unsigned k = 0; k < bit_len; ++k) {
         if (keystream[k] >= 0)
-            printf("; 0x%02x, // key at bit %d\n", (unsigned)keystream[k], k);
+            printf("; 0x%02x, // key at bit %u\n", (unsigned)keystream[k], k);
         else
-            printf("; 0, // key at bit %d not found\n", k);
+            printf("; 0, // key at bit %u not found\n", k);
     }
 
     free(keystream);
@@ -198,6 +197,7 @@ static void key_brk(void)
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
+    (void)argc;
     fprintf(stderr, "%s: [-v] [-b n | -c | -k] codes.txt\n", argv[0]);
     exit(1);
 }
@@ -234,11 +234,12 @@ int main(int argc, char const *argv[])
     if (argc <= i) {
         fprintf(stderr, "Reading STDIN...\n");
     }
-    list_len = read_codes(argv[i], data, &msg_len, MSG_MAX, LIST_MAX);
-    if (list_len <= 0) {
+    int ret = read_codes(argv[i], data, &msg_len, MSG_MAX, LIST_MAX);
+    if (ret <= 0) {
         fprintf(stderr, "Missing data!\n");
         usage(argc, argv);
     }
+    list_len = (unsigned)ret;
     if (msg_len <= 1) {
         fprintf(stderr, "Message length too short!\n");
         usage(argc, argv);

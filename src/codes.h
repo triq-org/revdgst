@@ -39,9 +39,9 @@ int parse_code(char const *text, struct data *data);
 
 int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsigned msg_max, unsigned list_max);
 
-int sprint_code(char *dst, struct data *data, unsigned msg_len);
+int sprint_code(char *dst, struct data const *data, unsigned msg_len);
 
-void print_codes(struct data *data, unsigned msg_len, unsigned list_len);
+void print_codes(struct data const *data, unsigned msg_len, unsigned list_len);
 
 void free_codes(struct data *data, unsigned list_len);
 

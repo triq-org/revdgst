@@ -38,9 +38,9 @@ static void row_weight(void)
     unsigned min_weight = msg_len * 8;
     unsigned sum_weight = 0;
 
-    for (int i = 0; i < list_len; ++i) {
+    for (unsigned i = 0; i < list_len; ++i) {
         unsigned weight = 0;
-        for (int j = 0; j < msg_len; ++j) {
+        for (unsigned j = 0; j < msg_len; ++j) {
             weight += popcount(data[i].d[j]);
         }
         if (weight > max_weight) max_weight = weight;
@@ -57,23 +57,23 @@ static void row_weight(void)
 
 static void byte_sums(unsigned off, unsigned len, unsigned chk)
 {
-    int max_add = 0;
-    int max_sub = 0;
-    int max_xor = 0;
+    unsigned max_add = 0;
+    unsigned max_sub = 0;
+    unsigned max_xor = 0;
     uint8_t rem_add = 0;
     uint8_t rem_sub = 0;
     uint8_t rem_xor = 0;
 
-    for (int i = 0; i < list_len; ++i) {
-        int found_add = 0;
-        int found_sub = 0;
-        int found_xor = 0;
+    for (unsigned i = 0; i < list_len; ++i) {
+        unsigned found_add = 0;
+        unsigned found_sub = 0;
+        unsigned found_xor = 0;
         uint8_t sumi = add_bytes(&data[i].d[off], len);
         uint8_t addi = sumi + data[i].d[chk];
         uint8_t subi = sumi - data[i].d[chk];
         uint8_t xori = sumi ^ data[i].d[chk];
 
-        for (int j = 0; j < list_len; ++j) {
+        for (unsigned j = 0; j < list_len; ++j) {
             uint8_t sumj = add_bytes(&data[j].d[off], len);
             uint8_t addj = sumj + data[j].d[chk];
             uint8_t subj = sumj - data[j].d[chk];
@@ -110,23 +110,23 @@ static void byte_sums(unsigned off, unsigned len, unsigned chk)
 
 static void nibble_sums(unsigned off, unsigned len, unsigned chk)
 {
-    int max_add = 0;
-    int max_sub = 0;
-    int max_xor = 0;
+    unsigned max_add = 0;
+    unsigned max_sub = 0;
+    unsigned max_xor = 0;
     uint8_t rem_add = 0;
     uint8_t rem_sub = 0;
     uint8_t rem_xor = 0;
 
-    for (int i = 0; i < list_len; ++i) {
-        int found_add = 0;
-        int found_sub = 0;
-        int found_xor = 0;
+    for (unsigned i = 0; i < list_len; ++i) {
+        unsigned found_add = 0;
+        unsigned found_sub = 0;
+        unsigned found_xor = 0;
         uint8_t sumi = add_nibbles(&data[i].d[off], len);
         uint8_t addi = sumi + data[i].d[chk];
         uint8_t subi = sumi - data[i].d[chk];
         uint8_t xori = sumi ^ data[i].d[chk];
 
-        for (int j = 0; j < list_len; ++j) {
+        for (unsigned j = 0; j < list_len; ++j) {
             uint8_t sumj = add_nibbles(&data[j].d[off], len);
             uint8_t addj = sumj + data[j].d[chk];
             uint8_t subj = sumj - data[j].d[chk];
@@ -163,17 +163,16 @@ static void nibble_sums(unsigned off, unsigned len, unsigned chk)
 
 static void crc8_scan(unsigned off, unsigned len, unsigned chk)
 {
-    for (int p = 1; p <= 255; ++p) {
-        int found_max = 0;
-        int found_poly = 0;
-        int found_fin = 0;
-        int found_init = -1;
+    for (unsigned p = 1; p <= 255; ++p) {
+        unsigned found_max = 0;
+        uint8_t found_poly = 0;
+        uint8_t found_fin = 0;
 
-        for (int i = 0; i < list_len; ++i) {
-            int found = 0;
+        for (unsigned i = 0; i < list_len; ++i) {
+            unsigned found = 0;
             uint8_t chki = crc8(&data[i].d[off], len, p, 0x00) ^ data[i].d[chk];
 
-            for (int j = 0; j < list_len; ++j) {
+            for (unsigned j = 0; j < list_len; ++j) {
                 uint8_t chkj = crc8(&data[j].d[off], len, p, 0x00) ^ data[j].d[chk];
                 if (chki == chkj) {
                     found++;
@@ -188,10 +187,11 @@ static void crc8_scan(unsigned off, unsigned len, unsigned chk)
         }
 
         if (found_max > min_matches) {
+            int found_init = -1;
             // recover the init
             for (int q = 0; q <= 255; ++q) {
-                int init_match = 0;
-                for (int j = 0; j < list_len; ++j) {
+                unsigned init_match = 0;
+                for (unsigned j = 0; j < list_len; ++j) {
                     uint8_t chkj = crc8(&data[j].d[off], len, p, q) ^ data[j].d[chk];
                     if (chkj == 0) {
                         init_match++;
@@ -205,11 +205,11 @@ static void crc8_scan(unsigned off, unsigned len, unsigned chk)
 
             if (found_init >= 0) {
                 printf("Found: crc8(&b[%u], %u, 0x%02x, 0x%02x) == b[%u]; // (%.1f%%)\n",
-                        off, len, found_poly, found_init, chk, found_max * 100.0 / list_len);
+                        off, len, found_poly, (uint8_t)found_init, chk, found_max * 100.0 / list_len);
             }
             else {
                 printf("Found: crc8(&b[%u], %u, 0x%02x, 0x%02x) ^ b[%u] == 0x%02x; // (%.1f%%)\n",
-                        off, len, found_poly, 0, chk, found_fin, found_max * 100.0 / list_len);
+                        off, len, found_poly, (uint8_t)0, chk, found_fin, found_max * 100.0 / list_len);
             }
         }
     }
@@ -218,16 +218,15 @@ static void crc8_scan(unsigned off, unsigned len, unsigned chk)
 static void crc4_scan(unsigned off, unsigned len, unsigned chk)
 {
     for (int p = 1; p <= 15; ++p) {
-        int found_max = 0;
-        int found_poly = 0;
-        int found_fin = 0;
-        int found_init = -1;
+        unsigned found_max = 0;
+        uint8_t found_poly = 0;
+        uint8_t found_fin = 0;
 
-        for (int i = 0; i < list_len; ++i) {
-            int found = 0;
+        for (unsigned i = 0; i < list_len; ++i) {
+            unsigned found = 0;
             uint8_t chki = crc4(&data[i].d[off], len, p, 0x00) ^ data[i].d[chk];
 
-            for (int j = 0; j < list_len; ++j) {
+            for (unsigned j = 0; j < list_len; ++j) {
                 uint8_t chkj = crc4(&data[j].d[off], len, p, 0x00) ^ data[j].d[chk];
                 if (chki == chkj) {
                     found++;
@@ -242,10 +241,11 @@ static void crc4_scan(unsigned off, unsigned len, unsigned chk)
         }
 
         if (found_max > min_matches) {
+            int found_init = -1;
             // recover the init
             for (int q = 0; q <= 15; ++q) {
-                int init_match = 0;
-                for (int j = 0; j < list_len; ++j) {
+                unsigned init_match = 0;
+                for (unsigned j = 0; j < list_len; ++j) {
                     uint8_t chkj = crc4(&data[j].d[off], len, p, q) ^ data[j].d[chk];
                     if (chkj == 0) {
                         init_match++;
@@ -259,11 +259,11 @@ static void crc4_scan(unsigned off, unsigned len, unsigned chk)
 
             if (found_init >= 0) {
                 printf("Found: crc4(&b[%u], %u, 0x%02x, 0x%02x) == b[%u]; // (%.1f%%)\n",
-                        off, len, found_poly, found_init, chk, found_max * 100.0 / list_len);
+                        off, len, found_poly, (uint8_t)found_init, chk, found_max * 100.0 / list_len);
             }
             else {
                 printf("Found: crc4(&b[%u], %u, 0x%02x, 0x%02x) ^ b[%u] == 0x%02x; // (%.1f%%)\n",
-                        off, len, found_poly, 0, chk, found_fin, found_max * 100.0 / list_len);
+                        off, len, found_poly, (uint8_t)0, chk, found_fin, found_max * 100.0 / list_len);
             }
         }
     }
@@ -290,15 +290,15 @@ static void xor_shift(unsigned off, unsigned len, unsigned chk)
 {
     for (int shift_up = 0; shift_up <= 127; ++shift_up) {
         for (int shift_dn = 0; shift_dn <= 127; ++shift_dn) {
-            int found_max = 0;
-            int found_shift_up = 0;
-            int found_shift_dn = 0;
+            unsigned found_max = 0;
+            uint8_t found_shift_up = 0;
+            uint8_t found_shift_dn = 0;
 
-            for (int i = 0; i < list_len; ++i) {
-                int found = 0;
+            for (unsigned i = 0; i < list_len; ++i) {
+                unsigned found = 0;
                 uint8_t chki = xor_shift_bytes(&data[i].d[off], len, shift_up, shift_dn) ^ data[i].d[chk];
 
-                for (int j = 0; j < list_len; ++j) {
+                for (unsigned j = 0; j < list_len; ++j) {
                     uint8_t chkj = xor_shift_bytes(&data[j].d[off], len, shift_up, shift_dn) ^ data[j].d[chk];
                     if (chki == chkj) {
                         found++;
@@ -344,6 +344,7 @@ static void scan_algos(void)
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
+    (void)argc;
     fprintf(stderr, "%s: codes.txt\n", argv[0]);
     exit(1);
 }
@@ -392,20 +393,20 @@ int main(int argc, char const *argv[])
     scan_algos();
 
     fprintf(stderr, "INVERT Inverting...\n");
-    for (int j = 0; j < list_len; ++j) {
+    for (unsigned j = 0; j < list_len; ++j) {
         invert_bytes(data[j].d, msg_len);
     }
     scan_algos();
 
     fprintf(stderr, "BYTE_REFLECT Reflecting...\n");
-    for (int j = 0; j < list_len; ++j) {
+    for (unsigned j = 0; j < list_len; ++j) {
         invert_bytes(data[j].d, msg_len);
         reflect_bytes(data[j].d, msg_len);
     }
     scan_algos();
 
     fprintf(stderr, "INVERT BYTE_REFLECT Inverting...\n");
-    for (int j = 0; j < list_len; ++j) {
+    for (unsigned j = 0; j < list_len; ++j) {
         invert_bytes(data[j].d, msg_len);
     }
     scan_algos();

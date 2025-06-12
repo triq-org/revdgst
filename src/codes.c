@@ -93,7 +93,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
         uint8_t *d = data->d;
         unsigned nibble = 0;
         int bit_len = -1;
-        char *cmt = NULL;
+        char const *cmt = NULL;
         for (char *p = line; *p; ++p) {
             // skip bracket comment, can be nested
             if (*p == '[') {
@@ -144,7 +144,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
             }
             // parse optional length indicator
             if (*p == '{') {
-                char *l = ++p;
+                char const *l = ++p;
                 while (*p && *p != '}')
                     p++;
                 char *e = NULL;
@@ -213,7 +213,7 @@ int read_codes(char const *filename, struct data *data, unsigned *msg_len, unsig
     return cnt;
 }
 
-int sprint_code(char *dst, struct data *data, unsigned msg_len)
+int sprint_code(char *dst, struct data const *data, unsigned msg_len)
 {
     if (!msg_len) {
         return 0;
@@ -227,7 +227,7 @@ int sprint_code(char *dst, struct data *data, unsigned msg_len)
     return r;
 }
 
-void print_codes(struct data *data, unsigned msg_len, unsigned list_len)
+void print_codes(struct data const *data, unsigned msg_len, unsigned list_len)
 {
     char buf[MSG_MAX * 3 + 1];
     printf("; %u code of len %u\n", list_len, msg_len);

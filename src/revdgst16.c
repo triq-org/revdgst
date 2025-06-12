@@ -97,7 +97,7 @@ static int runner(int offset)
             int fss = 1;
             int fxs = 1;
 
-            for (int i = 1; i < list_len; ++i) {
+            for (unsigned i = 1; i < list_len; ++i) {
                 struct data dd = data[i];
                 uint16_t ds;
                 uint16_t dx;
@@ -144,6 +144,7 @@ static int runner(int offset)
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
+    (void)argc;
     fprintf(stderr, "%s: codes.txt\n", argv[0]);
     exit(1);
 }
@@ -157,11 +158,12 @@ int main(int argc, char const *argv[])
     if (argc <= 1) {
         fprintf(stderr, "Reading STDIN...\n");
     }
-    list_len = read_codes(argv[1], data, &msg_len, MSG_MAX, LIST_MAX);
-    if (list_len <= 0) {
+    int ret = read_codes(argv[1], data, &msg_len, MSG_MAX, LIST_MAX);
+    if (ret <= 0) {
         fprintf(stderr, "Missing data!\n");
         usage(argc, argv);
     }
+    list_len = (unsigned)ret;
     if (msg_len <= 1) {
         fprintf(stderr, "Message length too short!\n");
         usage(argc, argv);
@@ -177,7 +179,7 @@ int main(int argc, char const *argv[])
 
     // byte swap and run again
     fprintf(stderr, "Swapping byte order\n");
-    for (int i = 0; i < list_len; ++i) {
+    for (unsigned i = 0; i < list_len; ++i) {
         data[i].chk16 = (data[i].chk16 << 8) | (data[i].chk16 >> 8);
     }
     found = 0;

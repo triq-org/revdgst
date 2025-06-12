@@ -9,6 +9,7 @@
     (at your option) any later version.
 */
 
+#include <stdio.h>
 #include <time.h>
 #include <sys/times.h>
 #include <unistd.h>

@@ -25,6 +25,7 @@ static unsigned list_len = 0;
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
+    (void)argc;
     fprintf(stderr, "%s: -p POLY [-i INIT] [-x FINAL-XOR] codes.txt\n", argv[0]);
     exit(1);
 }
@@ -74,7 +75,7 @@ int main(int argc, char const *argv[])
     if (verbose)
         print_codes(data, msg_len, list_len);
 
-    for (int j = 0; j < list_len; ++j) {
+    for (unsigned j = 0; j < list_len; ++j) {
         struct data *d = &data[j];
         int chk;
         if (poly > 255)

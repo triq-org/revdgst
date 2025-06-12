@@ -32,7 +32,7 @@ There is no overhead in making an algorithm consume data bits in multiple possib
 
 __attribute__((always_inline))
 static inline void algo_fletcher8(int y_rev, int i_rev, int rev,
-        uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
+        uint8_t const *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
     int y_min, y_max, y_step;
@@ -67,7 +67,7 @@ static inline void algo_fletcher8(int y_rev, int i_rev, int rev,
 
 __attribute__((always_inline))
 static inline void algo_shift16_8(int y_rev, int i_rev, int rev,
-        uint8_t *msg, int bytes, uint8_t key1, uint8_t key2, uint8_t *sum_add, uint8_t *sum_xor)
+        uint8_t const *msg, int bytes, uint8_t key1, uint8_t key2, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
     int y_min, y_max, y_step;
@@ -117,7 +117,7 @@ static inline void algo_shift16_8(int y_rev, int i_rev, int rev,
 
 __attribute__((always_inline))
 static inline void algo_elcheapo8(int y_rev, int i_rev, int rev,
-        uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
+        uint8_t const *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
     int y_min, y_max, y_step;
@@ -146,7 +146,7 @@ static inline void algo_elcheapo8(int y_rev, int i_rev, int rev,
 
 __attribute__((always_inline))
 static inline void algo_crc8(int y_rev, int i_rev, int rev,
-        uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
+        uint8_t const *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
     int y_min, y_max, y_step;
@@ -197,7 +197,7 @@ static inline void algo_crc8(int y_rev, int i_rev, int rev,
 // gen needs to includes the msb if the lfsr is rolling, key is the initial key
 __attribute__((always_inline))
 static inline void algo_lfsr_digest8_galois(int y_rev, int i_rev, int rev,
-        uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
+        uint8_t const *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
     int y_min, y_max, y_step;
@@ -257,7 +257,7 @@ static inline void algo_lfsr_digest8_galois(int y_rev, int i_rev, int rev,
 // gen needs to includes the msb if the lfsr is rolling, key is the initial key
 __attribute__((always_inline))
 static inline void algo_lfsr_digest8_fibonacci(int y_rev, int i_rev, int rev,
-        uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
+        uint8_t const *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     // all this will be optimized away
     int y_min, y_max, y_step;
@@ -315,7 +315,7 @@ static inline void algo_lfsr_digest8_fibonacci(int y_rev, int i_rev, int rev,
 
 __attribute__((always_inline))
 static inline void call_algo(int algo, int y_rev, int i_rev, int rev,
-        uint8_t *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
+        uint8_t const *msg, int bytes, uint8_t gen, uint8_t key, uint8_t *sum_add, uint8_t *sum_xor)
 {
     if (algo == 1)
         algo_lfsr_digest8_galois(y_rev, i_rev, rev, msg, bytes, gen, key, sum_add, sum_xor);
@@ -354,14 +354,14 @@ static inline void *runner(int algo, int y_rev, int i_rev, int rev)
             //printf("g %02x k %02x chk %02x rsx: %02x rxx: %02x rsa: %02x rxa: %02x rss: %02x rxs: %02x\n", g, k, rd.chk, rsx, rxx, rsa, rxa, rss, rxs);
             //printf("rsx: %02x rxx: %02x rsa: %02x rxa: %02x rss: %02x rxs: %02x\n", rsx, rxx, rsa, rxa, rss, rxs);
 
-            int fsx = 0;
-            int fxx = 0;
-            int fsa = 0;
-            int fxa = 0;
-            int fss = 0;
-            int fxs = 0;
+            unsigned fsx = 0;
+            unsigned fxx = 0;
+            unsigned fsa = 0;
+            unsigned fxa = 0;
+            unsigned fss = 0;
+            unsigned fxs = 0;
 
-            for (int i = 1; i < list_len; ++i) {
+            for (unsigned i = 1; i < list_len; ++i) {
                 struct data dd = data[i];
                 uint8_t ds;
                 uint8_t dx;
@@ -477,6 +477,7 @@ static int job_run(int job_num)
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
+    (void)argc;
     fprintf(stderr, "%s: [-v] [-s|-p] codes.txt\n", argv[0]);
     exit(1);
 }
@@ -510,11 +511,12 @@ int main(int argc, char const *argv[])
     if (argc <= i) {
         fprintf(stderr, "Reading STDIN...\n");
     }
-    list_len = read_codes(argv[i], data, &msg_len, MSG_MAX, LIST_MAX);
-    if (list_len <= 0) {
+    int ret = read_codes(argv[i], data, &msg_len, MSG_MAX, LIST_MAX);
+    if (ret <= 0) {
         fprintf(stderr, "Missing data!\n");
         usage(argc, argv);
     }
+    list_len = (unsigned)ret;
     if (msg_len <= 1) {
         fprintf(stderr, "Message length too short!\n");
         usage(argc, argv);

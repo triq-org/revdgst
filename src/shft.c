@@ -22,7 +22,7 @@ static unsigned list_len = 0;
 
 static void invert_bits(void)
 {
-    for (int i = 0; i < list_len; ++i) {
+    for (unsigned i = 0; i < list_len; ++i) {
         struct data *d = &data[i];
         // flip whole bytes
         for (int k = 0; k < (d->bit_len / 8); ++k) {
@@ -44,7 +44,7 @@ static void shift_bits(int bits)
         msg_len += bytes;
         bits = bits % 8;
 
-        for (int i = 0; i < list_len; ++i) {
+        for (unsigned i = 0; i < list_len; ++i) {
             memmove(&data[i].d[bytes], data[i].d, msg_len - bytes);
             memset(data[i].d, 0, bytes);
             for (int k = msg_len; k > bytes; --k) {
@@ -60,10 +60,10 @@ static void shift_bits(int bits)
         msg_len -= bytes;
         bits = (-bits) % 8;
 
-        for (int i = 0; i < list_len; ++i) {
+        for (unsigned i = 0; i < list_len; ++i) {
             memmove(data[i].d, &data[i].d[bytes], msg_len);
             memset(&data[i].d[msg_len], 0, bytes);
-            for (int k = 0; k < msg_len; ++k) {
+            for (unsigned k = 0; k < msg_len; ++k) {
                 data[i].d[k] <<= bits;
                 data[i].d[k] |= data[i].d[k + 1] >> (8 - bits);
             }
@@ -81,7 +81,7 @@ static void trim_bits(int bits)
         bits = bits % 8;
 
         uint8_t mask = 0xff << bits;
-        for (int i = 0; i < list_len; ++i) {
+        for (unsigned i = 0; i < list_len; ++i) {
             data[i].d[msg_len - 1] &= mask;
         }
     }
@@ -128,7 +128,7 @@ static void sync_bits(struct data *f)
         return;
 
     int m = 0;
-    for (int j = 0; j < list_len; ++j) {
+    for (unsigned j = 0; j < list_len; ++j) {
         int offs = find_offset(&data[j], f);
         if (offs < 0)
             continue; // not matching
@@ -155,6 +155,7 @@ static void sync_bits(struct data *f)
 __attribute__((noreturn))
 static void usage(int argc, char const *argv[])
 {
+    (void)argc;
     fprintf(stderr, "%s: [-s x] [-t x] [-f x] [-i] codes.txt\n", argv[0]);
     exit(1);
 }
@@ -192,11 +193,12 @@ int main(int argc, char const *argv[])
     if (argc <= i) {
         fprintf(stderr, "Reading STDIN...\n");
     }
-    list_len = read_codes(argv[i], data, &msg_len, MSG_MAX, LIST_MAX);
-    if (list_len <= 0) {
+    int ret = read_codes(argv[i], data, &msg_len, MSG_MAX, LIST_MAX);
+    if (ret <= 0) {
         fprintf(stderr, "Missing data!\n");
         usage(argc, argv);
     }
+    list_len = (unsigned)ret;
     if (msg_len <= 0) {
         fprintf(stderr, "Message length too short!\n");
         usage(argc, argv);
